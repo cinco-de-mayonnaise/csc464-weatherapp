@@ -4,6 +4,8 @@ import android.annotation.SuppressLint;
 import android.util.JsonReader;
 import android.util.Log;
 
+import com.google.gson.Gson;
+
 import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
@@ -50,7 +52,12 @@ public class WeatherAPICaller {
         {
             JsonReader jr = new JsonReader(new BufferedReader(new InputStreamReader(req.getInputStream())));
             Log.d("attempt to get json data", jr.toString());
-            JSONObject jo = new JSONObject();
+            //JSONObject jo = new JSONObject();
+            Gson g = new Gson();
+
+            g.fromJson(jr)
+
+
         }
         finally {
             req.disconnect();
