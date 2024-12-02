@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/loadingFragment">
+
+    <fragment
+        android:id="@+id/SwipeFragment"
+        android:name="com.abdullah.beginner.weatherapp.SwipeFragment"
+        android:label="@string/first_fragment_label"
+        tools:layout="@layout/fragment_swipe">
+
+        <action
+            android:id="@+id/action_SwipeFragment_to_settingsFragment"
+            app:destination="@id/settingsFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:label="@string/settings_fragment_label"
+        android:name="com.abdullah.beginner.weatherapp.SettingsFragment"></fragment>
+    <fragment
+        android:id="@+id/loadingFragment"
+        android:name="com.abdullah.beginner.weatherapp.LoadingFragment"
+        android:label="LoadingFragment"
+        tools:layout="@layout/fragment_loading">
+        <action
+            android:id="@+id/action_loadingFragment_to_SwipeFragment"
+            app:destination="@id/SwipeFragment"
+            app:popUpTo="@id/loadingFragment"
+            app:popUpToInclusive="true"/>
+    </fragment>
+    <fragment
+        android:id="@+id/summaryFragment__swipechild"
+        android:name="com.abdullah.beginner.weatherapp.SummaryFragment__swipechild"
+        android:label="SummaryFragment__swipechild" />
+</navigation>
