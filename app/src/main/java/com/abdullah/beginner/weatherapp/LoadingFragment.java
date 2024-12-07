@@ -57,7 +57,8 @@ public class LoadingFragment extends Fragment {
                 try {
                     wac.call();
                 } catch (Exception e) {
-                    Log.e("Fail", "Failed to get weather data!: " + e.toString());
+                    Log.e(getClass().getName(), "Failed to get weather data!: " + e.toString());
+                    Log.d(getClass().getName(), Log.getStackTraceString(e));
                 }
 
                 APIcaller_handler.post(new Runnable() {
@@ -65,10 +66,10 @@ public class LoadingFragment extends Fragment {
                     public void run() {   // work here is done in application thread (UI)
 
                         // the navigation stack so we don't go back to loading again!
-                        Log.d("wtf", "Stack: " + navcontroller.getVisibleEntries().getValue().toString());
-                        Log.d("wtf", "popBack returned " + Boolean.toString(navcontroller.popBackStack(R.id.loadingFragment, true)));
+                        Log.d("LoadingFragment -> SwipeFragment", "Stack: " + navcontroller.getVisibleEntries().getValue().toString());
+                        Log.d("LoadingFragment -> SwipeFragment", "popBack returned " + Boolean.toString(navcontroller.popBackStack(R.id.loadingFragment, true)));
                         navcontroller.navigate(R.id.SwipeFragment);
-                        Log.d("wtf", "Stack: " + navcontroller.getVisibleEntries().getValue().toString());
+                        Log.d("LoadingFragment -> SwipeFragment", "Stack: " + navcontroller.getVisibleEntries().getValue().toString());
                     }
                 });
             }
