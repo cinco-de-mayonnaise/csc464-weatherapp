@@ -23,13 +23,7 @@
         android:id="@+id/loadingFragment"
         android:name="com.abdullah.beginner.weatherapp.LoadingFragment"
         android:label="LoadingFragment"
-        tools:layout="@layout/fragment_loading">
-        <action
-            android:id="@+id/action_loadingFragment_to_SwipeFragment"
-            app:destination="@id/SwipeFragment"
-            app:popUpTo="@id/loadingFragment"
-            app:popUpToInclusive="true"/>
-    </fragment>
+        tools:layout="@layout/fragment_loading"/>
     <fragment
         android:id="@+id/summaryFragment__swipechild"
         android:name="com.abdullah.beginner.weatherapp.SummaryFragment__swipechild"

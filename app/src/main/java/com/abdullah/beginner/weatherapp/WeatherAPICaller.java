@@ -1,49 +1,50 @@
 package com.abdullah.beginner.weatherapp;
 
 import android.annotation.SuppressLint;
-import android.util.JsonReader;
 import android.util.Log;
 
-import com.google.gson.Gson;
+import androidx.annotation.NonNull;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.Reader;
 import java.io.Serializable;
-import java.io.StringReader;
-import java.io.StringWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
 
 public class WeatherAPICaller implements Serializable {
-    String BASE_URL_FORECAST = "https://api.openweathermap.org/data/2.5/forecast";
-    String BASE_URL_CURRENT = "https://api.openweathermap.org/data/2.5/weather";
+    final String BASE_URL_FORECAST = "https://api.openweathermap.org/data/2.5/forecast";
+    final String BASE_URL_CURRENT = "https://api.openweathermap.org/data/2.5/weather";
     double latitude;
     double longitude;
     WeatherForecastSet result;
     String apikey = "49d8bd8ae8b6f4d0d510afaaac7ccec3";
+
+
     public WeatherAPICaller(Double latitude, Double longitude)
     {
         this.latitude = latitude;
         this.longitude = longitude;
     }
 
+    public WeatherAPICaller(double latitude, double longitude, String apikey) {
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.apikey = apikey;
+    }
+
     @SuppressLint("DefaultLocale")
     private String produceURLstring(String BASE_URL)
     {
         return BASE_URL
-                + "?lat=" + String.format("%f", latitude)
+                + "?appid=" + apikey
+                + "&lat=" + String.format("%f", latitude)
                 + "&lon=" + String.format("%f", longitude)
-                + "&appid=" + apikey;
+                ;
     }
 
     private String getStringFromResponse(HttpURLConnection req) throws Exception {
@@ -51,7 +52,7 @@ public class WeatherAPICaller implements Serializable {
         {
             StringBuilder s = new StringBuilder();
             BufferedReader bf = new BufferedReader(new InputStreamReader(req.getInputStream()));
-            Log.d(getClass().getName(), "Attempting to get json data");
+            //Log.d(getClass().getName(), "Attempting to get json data");
 
             while (true)
             {
@@ -68,11 +69,13 @@ public class WeatherAPICaller implements Serializable {
         }
     }
 
+    @NonNull
     public WeatherForecastSet call() throws Exception
     {
         return this.call(false);
     }
 
+    @NonNull
     public WeatherForecastSet call(boolean forceupdate) throws Exception {
 
         if (!forceupdate)
@@ -89,6 +92,7 @@ public class WeatherAPICaller implements Serializable {
                 }
             }
         }
+        Log.i(getClass().getName(), "No previous results found, connecting to ");
 
         HttpURLConnection req_forecast = (HttpURLConnection) new URL(produceURLstring(BASE_URL_FORECAST)).openConnection();
         req_forecast.setRequestMethod("GET");
@@ -104,15 +108,12 @@ public class WeatherAPICaller implements Serializable {
         req_forecast.setConnectTimeout(10000);
         req_forecast.setReadTimeout(10000);
 
+
         WeatherForecastSet result = unpack(getStringFromResponse(req_forecast), getStringFromResponse(req_current));
-
-        // lets get ready to rumbleeeeee
-        //printWeatherForecastSet(result);  // sout doesnt appear on
-
         // WORKS!
-        // TODO: Your api call is only getting forecasts, add the call for current weather too.
 
         req_forecast.disconnect();
+        req_current.disconnect();
 
         this.result = result;
 
@@ -295,7 +296,7 @@ public class WeatherAPICaller implements Serializable {
 
     }
 
-    public static WeatherForecastSet unpack(String forecast_json, String current_json) throws JSONException, RuntimeException
+    private static WeatherForecastSet unpack(String forecast_json, String current_json) throws JSONException, RuntimeException
     {
         JSONObject root = new JSONObject(forecast_json);
 
@@ -344,9 +345,47 @@ public class WeatherAPICaller implements Serializable {
         }
 
         WeatherForecastSet.WeatherForecast current_weather = __unpack_weatherforecast(root);
+        // hack cause i need to get this shitty project done by today
+
+        // predict min and max temperature of a day by going through 8 entries of predicted weather and grabbing the min/max
+        double tempMin = 99999;
+        double tempMax = -99999;
+
+        for (int i = 0; i < 8; i++)
+        {
+            WeatherForecastSet.WeatherForecast f = forecasts.get(i);
+            if (f.temp() > tempMax)
+                tempMax = f.temp();
+            else if (f.temp() < tempMin)
+                tempMin = f.temp();
+        }
+
+        WeatherForecastSet.WeatherForecast current_weather_min_max_modified = new WeatherForecastSet.WeatherForecast(
+                current_weather.timestampForecast(),
+                current_weather.temp(),
+                current_weather.feelsLike(),
+                tempMin,
+                tempMax,
+                current_weather.pressure(),
+                current_weather.seaLevel(),
+                current_weather.groundLevel(),
+                current_weather.humidity(),
+                current_weather.weatherParameters(),
+                current_weather.weatherDescription(),
+                current_weather.weatherIconId(),
+                current_weather.windSpeed(),
+                current_weather.windDeg(),
+                current_weather.windGust(),
+                current_weather.visibility(),
+                current_weather.precipitationProbability(),
+                current_weather.partOfDay(),
+                current_weather.rainVolume(),
+                current_weather.cloudiness(),
+                current_weather.snowVolume()
+        );
 
         return new WeatherForecastSet(
-                current_weather,
+                current_weather_min_max_modified,
                 forecasts.toArray(new WeatherForecastSet.WeatherForecast[0]),
                 cityName,
                 countryCode,

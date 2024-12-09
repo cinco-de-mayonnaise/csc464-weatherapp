@@ -1,15 +1,19 @@
 package com.abdullah.beginner.weatherapp;
 
+import static com.abdullah.beginner.weatherapp.MainActivity.CONSTANTS.BUNKEY_ARR_LATEST_WEATHERS;
+import static com.abdullah.beginner.weatherapp.MainActivity.CONSTANTS.BUNKEY_WEATHER_COORDS;
+import static com.abdullah.beginner.weatherapp.MainActivity.CONSTANTS.PREFERENCE_FILE_KEY;
+
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.util.Log;
 
 import androidx.navigation.NavController;
-import androidx.navigation.NavDestination;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
@@ -19,11 +23,22 @@ import com.abdullah.beginner.weatherapp.databinding.ActivityMainBinding;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import java.util.Objects;
+import java.io.Serializable;
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
-    private AppBarConfiguration appBarConfiguration;
+    // ee koto kangaeta!
+    public static class CONSTANTS
+    {
+        public static String BUNKEY_ARR_LATEST_WEATHERS = "latest_weather_result";
+        public static String BUNKEY_FRAGMENT_WEATHER = "weather result for each fragment";
+        public static String PREFERENCE_FILE_KEY = "com.abdullah.beginner.weatherapp.__preferences_file.dat";
+        public static String BUNKEY_WEATHER_COORDS = "list of coordinates for which to collect weather data of";
+    }
+
+    SharedPreferences preferences;
+
     private ActivityMainBinding binding;
     private NavController navController;
 
@@ -31,14 +46,25 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // bind activitymainlayout (we put fragments inside content_main, not activity_main)
+        // get api callers out of savedInstanceState if they exist
+        ArrayList<WeatherAPICaller> callers;
+        if (savedInstanceState != null)
+            callers = (ArrayList<WeatherAPICaller>) savedInstanceState.getSerializable(BUNKEY_ARR_LATEST_WEATHERS);
+        else
+            callers = new ArrayList<>();
+        getIntent().putExtra(BUNKEY_ARR_LATEST_WEATHERS, callers);
+
+        // we store application settings and cities/weatherdata here
+        preferences = getSharedPreferences(PREFERENCE_FILE_KEY, Context.MODE_PRIVATE);
+
+        // bind Activitymainlayout (we put fragments inside content_main, not activity_main)
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         setSupportActionBar(binding.toolbar);
 
         // Setup App navigation (the thingy that allows us to move between different sections of the program and press (back) to go back or go home.
         navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
-        appBarConfiguration = new AppBarConfiguration.Builder(navController.getGraph()).build();
+        AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(navController.getGraph()).build();
 //        navController.addOnDestinationChangedListener(new NavController.OnDestinationChangedListener() {
 //            @Override
 //            public void onDestinationChanged(@NonNull NavController navController, @NonNull NavDestination navDestination, @Nullable Bundle bundle) {
@@ -55,6 +81,19 @@ public class MainActivity extends AppCompatActivity {
 //        });        // useless, had no effect
 
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration); // this guy automatically changes the title of the toolbar depending on the fragment you are in!
+
+        // uhhh not sure if this is a right place to do it but /shrug
+        //LocationRequest lr = new LocationManager();
+    }
+
+    protected void onSaveInstanceState(@NonNull Bundle outState)
+    {
+        super.onSaveInstanceState(outState);
+
+        // save the weather so we don't have to recall the API again and again.
+        Serializable s = getIntent().getSerializableExtra(BUNKEY_ARR_LATEST_WEATHERS);
+        Log.d(getClass().getName(), String.format("Saved weather states '%s' to activity bundle. ", s));
+        outState.putSerializable(BUNKEY_ARR_LATEST_WEATHERS, s);
     }
 
     public void hideMenuButtonFromToolbar()

@@ -85,7 +85,7 @@
                     android:layout_marginBottom="-6dp"
                     android:gravity="left"
                     android:includeFontPadding="false"
-                    android:text="Min"
+                    android:text="Max"
                     android:textSize="12sp" />
 
                 <TextView
@@ -105,7 +105,7 @@
                     android:layout_marginBottom="-6dp"
                     android:gravity="left"
                     android:includeFontPadding="false"
-                    android:text="Max"
+                    android:text="Min"
                     android:textSize="12sp" />
 
                 <TextView
@@ -115,7 +115,7 @@
                     android:layout_weight="1"
                     android:gravity="center|top"
                     android:includeFontPadding="false"
-                    android:text="26°C"
+                    android:text="26°M"
                     android:textSize="34sp" />
             </LinearLayout>
 
