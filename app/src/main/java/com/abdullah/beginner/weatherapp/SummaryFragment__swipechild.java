@@ -1,16 +1,22 @@
 package com.abdullah.beginner.weatherapp;
 
+import android.content.res.Configuration;
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.content.res.AppCompatResources;
+import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
 
@@ -84,6 +90,84 @@ public class SummaryFragment__swipechild extends Fragment {
         return Kelvin - 273.15;
     }
 
+    public boolean isNightMode() {
+        int nightModeFlags = requireContext().getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+        return nightModeFlags == Configuration.UI_MODE_NIGHT_YES;
+    }
+
+    private void setWeatherIcon(ImageView element, String weatherstring)
+    {
+        int id;
+        switch (weatherstring)
+        {
+            case "01d":
+                // clear sky (day)
+                id = R.drawable.ic_weather_clearday;
+                break;
+            case "01n":
+                // clear sky (night)
+                id = R.drawable.ic_weather_clearnight;
+                break;
+            case "02d":
+                // few clouds (day)
+                id = R.drawable.ic_weather_cloudyday;
+                break;
+            case "02n":
+                // few clouds (night)
+                id = R.drawable.ic_weather_cloudynight;
+                break;
+            case "03d":
+                // scattered clouds (day)
+            case "03n":
+                // scattered clouds (night)
+            case "04d":
+                // broken clouds (day)
+            case "04n":
+                // broken clouds (night)
+                id = R.drawable.ic_weather_cloudscatter;
+                break;
+            case "09d":
+                // shower rain (day)
+                id = R.drawable.ic_weather_lightrainday;
+                break;
+            case "09n":
+                // shower rain (night)
+                id = R.drawable.ic_weather_lightrainnight;
+                break;
+            case "10d":
+                // rain (day)
+            case "10n":
+                // rain (night)
+                id = R.drawable.ic_weather_rain;
+                break;
+            case "11d":
+                // thunderstorm (day)
+            case "11n":
+                // thunderstorm (night)
+                id = R.drawable.ic_weather_rainthunder;
+                break;
+            case "13d":
+                // snow (day)
+            case "13n":
+                // snow (night)
+                id = R.drawable.ic_weather_snow;
+                break;
+            case "50d":
+                // mist (day)
+            case "50n":
+                // mist (night)
+                id = R.drawable.ic_weather_mist;
+                break;
+            default:
+                // unknown weather condition
+                Log.e(getClass().getSimpleName(), "Warning, iconname string does not conform to API, string: "+ weatherstring);
+                id = R.drawable.ic_weather_none;
+                break;
+        }
+
+        Drawable d = DrawableCompat.wrap(Objects.requireNonNull(AppCompatResources.getDrawable(requireContext(), id)));
+        element.setImageDrawable(d);
+    }
     private void loadData()
     {
         if (weather_data == null)
@@ -95,6 +179,14 @@ public class SummaryFragment__swipechild extends Fragment {
         long currentTempNowMax = Math.round(KelvinToCelsius(weather_data.currentWeather().tempMax()));
         String timeAccordingToWeather = new Date(weather_data.currentWeather().timestampForecast() * 1000).toString();
 
+        // set icons
+        // we wrap the drawable to ensure support across different api levels
+        //Log.e("Ayyo weather icon", weather_data.currentWeather().weatherIconId());
+
+        setWeatherIcon(binding.imageViewWeathericon, weather_data.currentWeather().weatherIconId());
+
+        if (isNightMode())
+            DrawableCompat.setTint(DrawableCompat.wrap(binding.imageViewWeathericon.getDrawable()), Color.WHITE);
 
         binding.textViewCityName.setText(weather_data.cityName());
         binding.textViewCityTempNow.setText(String.format(Locale.getDefault(), "%d°C", currentTempNow));

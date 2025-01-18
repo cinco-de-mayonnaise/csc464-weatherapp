@@ -92,7 +92,7 @@ public class WeatherAPICaller implements Serializable {
                 }
             }
         }
-        Log.i(getClass().getName(), "No previous results found, connecting to ");
+        Log.i(getClass().getName(), "No previous results found, connecting to servers...");
 
         HttpURLConnection req_forecast = (HttpURLConnection) new URL(produceURLstring(BASE_URL_FORECAST)).openConnection();
         req_forecast.setRequestMethod("GET");
@@ -110,8 +110,8 @@ public class WeatherAPICaller implements Serializable {
 
 
         WeatherForecastSet result = unpack(getStringFromResponse(req_forecast), getStringFromResponse(req_current));
-        // WORKS!
 
+        // WORKS!
         req_forecast.disconnect();
         req_current.disconnect();
 
